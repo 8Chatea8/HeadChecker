@@ -68,9 +68,9 @@ def get_dataloader(train_path, test_path, tokenizer, MAX_LEN, BATCH_SIZE):
     train, valid = random_split(tokenized_train, [0.8, 0.2], generator=generator)
     
     # DataLoader
-    train_dataloader = DataLoader(train, sampler=RandomSampler(train), batch_size=BATCH_SIZE)
-    valid_dataloader = DataLoader(valid, sampler=SequentialSampler(valid), batch_size=BATCH_SIZE)
-    test_dataloader = DataLoader(tokenized_test, sampler=SequentialSampler(tokenized_test), batch_size=BATCH_SIZE)
+    train_dataloader = DataLoader(train, sampler=RandomSampler(train), batch_size=BATCH_SIZE, num_workers=8)
+    valid_dataloader = DataLoader(valid, sampler=SequentialSampler(valid), batch_size=BATCH_SIZE, num_workers=8)
+    test_dataloader = DataLoader(tokenized_test, sampler=SequentialSampler(tokenized_test), batch_size=BATCH_SIZE, num_workers=8)
     
     return train_dataloader, valid_dataloader, test_dataloader
 

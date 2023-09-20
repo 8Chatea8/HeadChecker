@@ -52,22 +52,27 @@ class Model(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         output = self._shared_step(batch, batch_idx)
 
+        train_loss = output['loss']
         train_acc = self.accuracy(torch.argmax(output['logits'], dim=1), output['labels'])
         train_precision = self.precision(torch.argmax(output['logits'], dim=1), output['labels'])
 
+        self.log('train_loss', train_loss)
         self.log('train_acc_step', train_acc)
         self.log('train_precision_step', train_precision)
 
         return output
 
+
     def validation_step(self, batch, batch_idx):
         output = self._shared_step(batch, batch_idx)
 
+        valid_loss = output['loss']
         valid_acc = self.accuracy(torch.argmax(output['logits'], dim=1), output['labels'])
         valid_precision = self.precision(torch.argmax(output['logits'], dim=1), output['labels'])
 
-        self.log('valid_acc', valid_acc)
-        self.log('valid_precision', valid_precision)
+        self.log('valid_loss', valid_loss)
+        self.log('valid_acc_step', valid_acc)
+        self.log('valid_precision_step', valid_precision)
 
         return output
 
@@ -77,7 +82,7 @@ class Model(pl.LightningModule):
         test_acc = self.accuracy(torch.argmax(output['logits'], dim=1), output['labels'])
         test_precision = self.precision(torch.argmax(output['logits'], dim=1), output['labels'])
 
-        self.log('test_acc', test_acc)
-        self.log('test_precision', test_precision)
-   
+        self.log('test_acc_step', test_acc)
+        self.log('test_precision_step', test_precision)
+
         return output
