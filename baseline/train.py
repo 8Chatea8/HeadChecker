@@ -66,7 +66,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", dest="TRAIN_PATH", action="store")
     parser.add_argument("-v", dest="TEST_PATH", action="store")
     parser.add_argument("-ml", dest="MAX_LEN", action='store')
-    parser.add_argument("bs", dest="BATCH_SIZE", action='store')
+    parser.add_argument("-bs", dest="BATCH_SIZE", action='store')
     
     args = parser.parse_args()
     main(args.MODEL_NAME, args.TRAIN_PATH, args.TEST_PATH, args.MAX_LEN, args.BATCH_SIZE)
