@@ -28,12 +28,13 @@ def seed_everything(seed):
     
 def main(MODEL_NAME, TRAIN_PATH, TEST_PATH, MAX_LEN, BATCH_SIZE):
     seed_everything(42)
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
     
     model = Model(MODEL_NAME)
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     train_dataloader, valid_dataloader, test_dataloader = get_dataloader(TRAIN_PATH, TEST_PATH, tokenizer, MAX_LEN, BATCH_SIZE)
     ckpt_dir = 'model/ckpt'
-    ckpt_filename = f'{MODEL_NAME}-{TRAIN_PATH}'
+    ckpt_filename = '{MODEL_NAME}-{epoch}-{valid_loss}'
     
     wandb_logger = WandbLogger(project="mahimahi")
     
@@ -58,7 +59,7 @@ def main(MODEL_NAME, TRAIN_PATH, TEST_PATH, MAX_LEN, BATCH_SIZE):
     
     trainer.fit(model, train_dataloader, valid_dataloader)
     
-    trainer.test(ckpt_path=ckpt_dir+ckpt_filename+".ckpt", dataloaders=test_dataloader)
+    trainer.test(ckpt_path="best", dataloaders=test_dataloader)
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
