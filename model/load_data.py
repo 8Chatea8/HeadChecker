@@ -12,6 +12,7 @@ class NewsDataset(Dataset):
         self.labels = dataset['label']
         self.input_ids = dataset['input_ids']
         self.attention_mask = dataset['attention_mask']
+        self.totken_type_ids = dataset['token_type_ids']
 
     def __len__(self):
         return len(self.labels)
@@ -20,39 +21,52 @@ class NewsDataset(Dataset):
         label = self.labels[idx]
         input_ids = self.input_ids[idx]
         attention_mask = self.attention_mask[idx]
-        return {"label": label, "input_ids":input_ids, "attention_mask":attention_mask}
+        token_type_ids = self.totken_type_ids[idx]
+        return {"label": label, 
+                "input_ids": input_ids, 
+                "attention_mask": attention_mask,
+                "token_type_ids": token_type_ids,
+               }
     
 
 def load_data(trainset_file_path, testset_file_path):
     train_data = pd.read_csv(trainset_file_path, encoding='utf-8')
     test_data = pd.read_csv(testset_file_path, encoding='utf-8')
+
+    if train_data.isnull().sum().sum() != 0:
+        train_data = train_data.dropna()
+        train_data = train_data.reset_index(drop=True)
+
+    if test_data.isnull().sum().sum() != 0:
+        test_data = test_data.dropna()
+        test_data = test_data.reset_index(drop=True)
     
     return train_data, test_data
 
 def preprocessing_data(dataset, tokenizer, max_length):
-    concat_entity = []
-    for title, body in zip(dataset['Headline'], dataset['Content']):
-        total = title + '[SEP]' + body
-        concat_entity.append(total)
+    headline = [sent for sent in dataset['Headline']]
+    content = [sent for sent in dataset['Content']]
         
-    tokenized_senteneces = tokenizer(
-        concat_entity,
+    tokenized_sentences = tokenizer(
+        headline, content,
         return_tensors = "pt",
         padding = True,
         truncation = True,
         max_length = max_length,
         add_special_tokens = True,
-        return_token_type_ids=False,
+        return_token_type_ids= True,
     )
 
-    input_ids = tokenized_senteneces.input_ids
-    attention_mask = tokenized_senteneces.attention_mask
+    input_ids = tokenized_sentences.input_ids
+    attention_mask = tokenized_sentences.attention_mask
+    token_type_ids = tokenized_sentences.token_type_ids
     label = torch.tensor(dataset['Class'])
     
     return {
         "label": label,
         "input_ids": input_ids,
         "attention_mask": attention_mask,
+        "token_type_ids": token_type_ids,
     }
 
 def get_dataloader(train_path, test_path, tokenizer, MAX_LEN, BATCH_SIZE):
